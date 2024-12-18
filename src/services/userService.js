@@ -189,10 +189,35 @@ let updateUserData = (data) => {
   });
 };
 
+let getAllCodeService = (typeInput) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!typeInput) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing required parameters!!!",
+        });
+      } else {
+        let res = {};
+        //Allcode lấy theo modelName trong file allcode.js
+        let allcode = await db.Allcode.findAll({
+          where: { type: typeInput },
+        });
+        res.errCode = 0;
+        res.message = allcode;
+        resolve(res);
+      }
+    } catch (e) {
+      reject(e); //nếu vào trường hợp reject thì hàm getAllCode bên userController.js sẽ chạy catch thì sẽ trả ra message lỗi và sẽ server sẽ không bị chết
+    }
+  });
+};
+
 module.exports = {
   handleUserLogin: handleUserLogin,
   getAllUsers: getAllUsers,
   createNewUser: createNewUser,
   updateUserData: updateUserData,
   deleteUser: deleteUser,
+  getAllCodeService: getAllCodeService,
 };
