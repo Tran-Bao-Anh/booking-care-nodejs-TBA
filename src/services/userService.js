@@ -24,7 +24,7 @@ let handleUserLogin = (email, password) => {
       if (isExist) {
         //user already exist
         let user = await db.User.findOne({
-          attributes: ["email", "roleId", "password"], //attributes dùng để chỉ lấy đúng các cột dữ liệu ["email", "roleId", "password"]
+          attributes: ["email", "roleId", "password", "firstName", "lastName"], //attributes dùng để chỉ lấy đúng các cột dữ liệu ["email", "roleId", "password"]
           where: { email: email },
           raw: true, //trả đúng dữ liệu trong db, không bọc dữ liệu vào các instance của model
         });
@@ -204,7 +204,7 @@ let getAllCodeService = (typeInput) => {
           where: { type: typeInput },
         });
         res.errCode = 0;
-        res.message = allcode;
+        res.data = allcode;
         resolve(res);
       }
     } catch (e) {
