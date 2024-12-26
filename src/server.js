@@ -12,8 +12,11 @@ require(`dotenv`).config(); //giúp lấy các tham số trong file môi tr�
 let app = express();
 app.use(cors({ origin: true }));
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "500mb", extended: true }));
 
 viewEngine(app);
 initWebRoutes(app);
