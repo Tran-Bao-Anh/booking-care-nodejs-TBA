@@ -5,11 +5,11 @@ let getTopDoctorHome = (limitInput) => {
   return new Promise(async (resolve, reject) => {
     try {
       let users = await db.User.findAll({
-        limit: limitInput,  // giới hạn kết quả truy vấn
+        limit: limitInput, // giới hạn kết quả truy vấn
         where: { roleId: "R2" }, //truy vấn tại các user có roleId: 'R2'
         order: [["createdAt", "DESC"]], //sắp xếp các user được truy vấn theo ngày tạo "createdAt", lấy thằng vừa tạo lên trước
-        attributes: {   
-          exclude: ["password"],    //bỏ trường password
+        attributes: {
+          exclude: ["password"], //bỏ trường password
         },
         include: [
           {
@@ -31,7 +31,56 @@ let getTopDoctorHome = (limitInput) => {
         data: users,
       });
     } catch (e) {
-        //nếu reject thì sẽ chạy ngay vào catch trong hàm getTopDoctorHome trong file doctorController.js
+      //nếu reject thì sẽ chạy ngay vào catch trong hàm getTopDoctorHome trong file doctorController.js
+      reject(e);
+    }
+  });
+};
+
+let getAllDoctors = () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let doctors = await db.User.findAll({
+        where: { roleId: "R2" },
+        attributes: {
+          exclude: ["password", "image"],
+        },
+      });
+      resolve({
+        errCode: 0,
+        data: doctors,
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
+let saveDetailInfoDoctor = (inputData) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (
+        !inputData.doctorId ||
+        !inputData.contentHTML ||
+        !inputData.contentMarkdown
+      ) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing parameter",
+        });
+      } else {
+        await db.Markdown.create({
+          contentHTML: inputData.contentHTML,
+          contentMarkdown: inputData.contentMarkdown,
+          description: inputData.description,
+          doctorId: inputData.doctorId,
+        });
+        resolve({
+          errCode: 0,
+          errMessage: 'Save info doctor succeed!'
+        })
+      }
+    } catch (e) {
       reject(e);
     }
   });
@@ -39,4 +88,6 @@ let getTopDoctorHome = (limitInput) => {
 
 module.exports = {
   getTopDoctorHome: getTopDoctorHome,
+  getAllDoctors: getAllDoctors,
+  saveDetailInfoDoctor: saveDetailInfoDoctor,
 };
