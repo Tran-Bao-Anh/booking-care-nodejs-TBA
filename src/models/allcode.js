@@ -9,6 +9,8 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      //Allcode có nhiều User thì foreignKey sẽ được định nghĩa tại model User
+      //1 user chỉ có 1 allcode, 1 allcode có nhiều user => quan hệ 1-nhiều
       Allcode.hasMany(models.User, {foreignKey: 'positionId', as: 'positionData'})
       Allcode.hasMany(models.User, {foreignKey: 'gender', as: 'genderData'})
     }
