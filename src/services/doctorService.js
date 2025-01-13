@@ -2,7 +2,7 @@ import { where } from "sequelize";
 import db from "../models/index";
 import { raw } from "body-parser";
 require("dotenv").config();
-import _ from "lodash";
+import _, { includes } from "lodash";
 
 const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE;
 
@@ -174,24 +174,58 @@ let bulkCreateSchedule = (data) => {
           attributes: ["timeType", "date", "doctorId", "maxNumber"],
           raw: true,
         });
-        //convert date
-        if (existing && existing.length > 0) {
-          existing = existing.map((item) => {
-            item.date = new Date(item.date).getTime();
-            return item;
-          });
-        }
+
         //compare different
+        //_.differenceWith trả ra một mảng mới chứ các phần tử của mảng schedule mà các phần tử đó lại không có trong mảng existing
+        // mảng schedule là mảng gửi lên từ react còn existing là mảng có sẵn trong data base
         let toCreate = _.differenceWith(schedule, existing, (a, b) => {
-          return a.timeType === b.timeType && a.date === b.date;
+          return a.timeType === b.timeType && +a.date === +b.date; // chỉ trả về data khác cái đã tồn tại
         });
+        console.log("check toCreate from doctorService: ", toCreate);
+
         //create data
         if (toCreate && toCreate.length > 0) {
-          await db.Schedule.bulkCreate(toCreate);
+          await db.Schedule.bulkCreate(toCreate); //thêm nhiều data cùng lúc
         }
         resolve({
           errCode: 0,
           errMessage: "Ok",
+        });
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
+let getScheduleByDate = (doctorId, date) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!doctorId || !date) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing required parameters",
+        });
+      } else {
+        let dataSchedule = await db.Schedule.findAll({
+          where: {
+            doctorId: doctorId,
+            date: date,
+          },
+          include: [
+            {
+              model: db.Allcode,
+              as: "timeTypeData",
+              attributes: ["valueEn", "valueVi"],
+            },
+          ],
+          raw: false,
+          nest: true,
+        });
+        if (!dataSchedule) dataSchedule = [];
+        resolve({
+          errCode: 0,
+          data: dataSchedule,
         });
       }
     } catch (e) {
@@ -206,4 +240,5 @@ module.exports = {
   saveDetailInfoDoctor: saveDetailInfoDoctor,
   getDetailDoctorById: getDetailDoctorById,
   bulkCreateSchedule: bulkCreateSchedule,
+  getScheduleByDate: getScheduleByDate,
 };

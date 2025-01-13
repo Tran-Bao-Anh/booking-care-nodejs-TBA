@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       //1 user chỉ có 1 allcode, 1 allcode có nhiều user => quan hệ 1-nhiều
       Allcode.hasMany(models.User, {foreignKey: 'positionId', as: 'positionData'})
       Allcode.hasMany(models.User, {foreignKey: 'gender', as: 'genderData'})
+      Allcode.hasMany(models.Schedule, {foreignKey: 'timeType', as:'timeTypeData'})
     }
   }
   Allcode.init(
