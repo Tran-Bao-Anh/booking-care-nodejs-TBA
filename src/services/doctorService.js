@@ -1,8 +1,6 @@
-import { where } from "sequelize";
 import db from "../models/index";
-import { raw } from "body-parser";
 require("dotenv").config();
-import _, { includes } from "lodash";
+import __ from "lodash";
 
 const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE;
 
@@ -68,13 +66,20 @@ let saveDetailInfoDoctor = (inputData) => {
         !inputData.doctorId ||
         !inputData.contentHTML ||
         !inputData.contentMarkdown ||
-        !inputData.action
+        !inputData.action ||
+        !inputData.selectedPrice ||
+        !inputData.selectedPayment ||
+        !inputData.selectProvince ||
+        !inputData.nameClinic ||
+        !inputData.addressClinic ||
+        !inputData.note
       ) {
         resolve({
           errCode: 1,
           errMessage: "Missing parameter",
         });
       } else {
+        //upsert to markdown
         if (inputData.action === "CREATE") {
           await db.Markdown.create({
             contentHTML: inputData.contentHTML,
@@ -94,6 +99,39 @@ let saveDetailInfoDoctor = (inputData) => {
             doctorMarkdown.updateAt = new Date();
             await doctorMarkdown.save();
           }
+        }
+
+        //upsert to Doctor_info table
+        let doctorInfo = await db.Doctor_Info.findOne({
+          where: {
+            doctorId: inputData.doctorId,
+          },
+          raw: false,
+        });
+        
+        if (doctorInfo) {
+          //update
+          doctorInfo.doctorId = inputData.doctorId;
+          doctorInfo.priceId = inputData.selectedPrice;
+          doctorInfo.provinceId = inputData.selectProvince;
+          doctorInfo.paymentId = inputData.selectedPayment;
+          doctorInfo.nameClinic = inputData.nameClinic;
+          doctorInfo.addressClinic = inputData.addressClinic;
+          doctorInfo.note = inputData.note;
+
+          await doctorInfo.save();
+          console.log(">>>check doctorInfo: ", doctorInfo);
+        } else {
+          //create
+          await db.Doctor_Info.create({
+            doctorId: inputData.doctorId,
+            priceId: inputData.selectedPrice,
+            provinceId: inputData.selectProvince,
+            paymentId: inputData.selectedPayment,
+            nameClinic: inputData.nameClinic,
+            addressClinic: inputData.addressClinic,
+            note: inputData.note,
+          });
         }
         resolve({
           errCode: 0,
