@@ -25,6 +25,10 @@ module.exports = (sequelize, DataTypes) => {
       //quan hệ 1-1, model user mà có 1 model markdown thì foreignKey sẽ được định nghĩa tại model Markdown
       User.hasOne(models.Markdown, { foreignKey: "doctorId" });
       User.hasOne(models.Doctor_Info, { foreignKey: "doctorId" });
+      User.hasMany(models.Schedule, {
+        foreignKey: "doctorId",
+        as: "doctorData",
+      });
     }
   }
   User.init(
