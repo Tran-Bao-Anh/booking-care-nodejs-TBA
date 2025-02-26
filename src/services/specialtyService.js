@@ -1,3 +1,4 @@
+const { where } = require("sequelize");
 const db = require("../models");
 
 let createSpecialty = (data) => {
@@ -52,7 +53,55 @@ let getAllSpecialty = () => {
   });
 };
 
+let getDetailSpecialtyById = (inputId, location) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!inputId || !location) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing parameter!",
+        });
+      } else {
+        let data = await db.Specialty.findOne({
+          where: {
+            id: inputId,
+          },
+          attributes: ["descriptionHTML", "descriptionMarkdown"],
+        });
+
+        if (data) {
+          let doctorSpecialty = [];
+          if (location === "ALL") {
+            doctorSpecialty = await db.Doctor_Info.findAll({
+              where: { specialtyId: inputId },
+              attributes: ["doctorId", "provinceId"],
+            });
+          } else {
+            //find by location
+            doctorSpecialty = await db.Doctor_Info.findAll({
+              where: {
+                specialtyId: inputId,
+                provinceID: location,
+              },
+              attributes: ["doctorId", "provinceId"],
+            });
+          }
+          data.doctorSpecialty = doctorSpecialty;
+        } else data = {};
+        resolve({
+          errMessage: "ok",
+          errCode: 0,
+          data,
+        });
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
 module.exports = {
   createSpecialty: createSpecialty,
   getAllSpecialty: getAllSpecialty,
+  getDetailSpecialtyById: getDetailSpecialtyById,
 };
