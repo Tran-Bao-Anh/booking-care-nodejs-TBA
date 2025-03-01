@@ -3,7 +3,8 @@ import homeController from "../controllers/homeController";
 import userController from "../controllers/userController";
 import doctorController from "../controllers/doctorController";
 import patientController from "../controllers/patientController";
-import specialtyController from '../controllers/specialtyController'
+import specialtyController from "../controllers/specialtyController";
+import clinicController from "../controllers/clinicController";
 
 let router = express.Router(); //dùng hàm Router() của express
 
@@ -45,11 +46,21 @@ let initWebRoutes = (app) => {
     "/api/get-profile-doctor-by-id",
     doctorController.getProfileDoctorById
   );
-  router.post("/api/patient-book-appointment", patientController.postBookAppointment);
-  router.post("/api/verify-book-appointment", patientController.postVerifyBookAppointment);
+  router.post(
+    "/api/patient-book-appointment",
+    patientController.postBookAppointment
+  );
+  router.post(
+    "/api/verify-book-appointment",
+    patientController.postVerifyBookAppointment
+  );
   router.post("/api/create-new-specialty", specialtyController.createSpecialty);
   router.get("/api/get-specialty", specialtyController.getAllSpecialty);
-  router.get("/api/get-detail-specialty-by-id", specialtyController.getDetailSpecialtyById);
+  router.get(
+    "/api/get-detail-specialty-by-id",
+    specialtyController.getDetailSpecialtyById
+  );
+  router.post("/api/create-new-clinic", clinicController.createClinic);
 
   return app.use("/", router);
 };
